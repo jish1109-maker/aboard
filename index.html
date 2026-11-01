@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>해외 매출 대시보드 (샘플)</title>
+<title>해외 매출 대시보드</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--up:#16a34a;--down:#dc2626;--accent:#2563eb}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--text:#e8eaf0;--muted:#9aa3b2;--line:#272c36;--up:#4ade80;--down:#f87171;--accent:#60a5fa}}
@@ -12,7 +12,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system
 .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:22px;margin:0 0 4px}
 .sub{color:var(--muted);margin:0 0 16px}
-.badge{display:inline-block;background:#fef3c7;color:#92400e;border-radius:999px;padding:2px 10px;font-size:12px;margin-left:6px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .filters{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:14px}
 .filters label{display:flex;align-items:center;gap:6px;color:var(--muted)}
@@ -49,13 +50,13 @@ tr.buyer td:first-child{padding-left:28px;color:var(--muted)}
 tr.brand td:first-child{padding-left:56px;color:var(--muted);font-size:13px}
 tr.brand td{font-size:13px}
 tr.total td{font-weight:700;border-top:2px solid var(--line)}
-.foot{color:var(--muted);font-size:12px;margin-top:18px}
-input[type=text],input[type=number],input[type=search]{height:34px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);padding:0 8px;font:inherit;min-width:0}
+input[type=text],input[type=number],input[type=search],input[type=email],input[type=password]{height:34px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);padding:0 8px;font:inherit;min-width:0}
 .btn{height:34px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);padding:0 12px;font:inherit;cursor:pointer;white-space:nowrap}
 .btn:disabled{opacity:.45;cursor:default}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.danger{color:var(--down)}
 .btn.sm{height:28px;padding:0 9px;font-size:13px}
+.linkbtn{background:none;border:0;color:var(--accent);cursor:pointer;font:inherit;padding:0}
 .card h3{font-size:14px;margin:0 0 4px}
 .form{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px;margin-top:6px}
 .form label{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:13px}
@@ -72,12 +73,37 @@ input[type=text],input[type=number],input[type=search]{height:34px;border:1px so
 #edit td input{height:28px;width:100%;min-width:90px;font-size:13px}
 #edit tr.editing td{background:rgba(37,99,235,.07)}
 #edit a{color:var(--accent)}
+.auth{max-width:380px;margin:12vh auto 0}
+.auth form{display:flex;flex-direction:column;gap:10px}
+.auth label{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:13px}
+.empty{text-align:center;color:var(--muted);padding:18px}
+[hidden]{display:none !important}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>해외 매출 통합 대시보드 <span class="badge" id="badge">샘플 데이터</span></h1>
-  <p class="sub">국가 · 채널 · 브랜드 · 기간별 매출 현황 — 필터를 바꾸면 KPI·그래프·표가 함께 바뀝니다. <a href="#mgr" style="color:var(--accent)">인보이스 등록·업로드·수정 ↓</a></p>
+
+  <div id="auth" class="auth card" hidden>
+    <h1>해외 매출 대시보드</h1>
+    <p class="sub">회사 메일(@interohrigin.com) 계정으로 로그인하세요.</p>
+    <form id="authForm">
+      <label>회사 메일<input type="email" name="email" required autocomplete="username" placeholder="name@interohrigin.com"></label>
+      <label>비밀번호<input type="password" name="password" required minlength="8" autocomplete="current-password"></label>
+      <div class="row-act" style="margin:0"><button class="btn pri" type="submit">로그인</button><button class="btn" type="button" id="signupBtn">처음이면 가입</button></div>
+      <button class="linkbtn" type="button" id="resetBtn" style="align-self:flex-start">비밀번호를 잊었어요</button>
+    </form>
+    <div class="msg" id="authMsg"></div>
+  </div>
+
+  <div id="app" hidden>
+  <div class="top">
+    <div>
+      <h1>해외 매출 통합 대시보드</h1>
+      <p class="sub">국가 · 채널 · 브랜드 · 기간별 매출 현황 — 필터를 바꾸면 KPI·그래프·표가 함께 바뀝니다. <a href="#mgr" style="color:var(--accent)">인보이스 등록·업로드·수정 ↓</a></p>
+    </div>
+    <div class="who"><span id="whoami"></span><button class="btn sm" type="button" id="reloadBtn">새로고침</button><button class="btn sm" type="button" id="logoutBtn">로그아웃</button></div>
+  </div>
+  <div class="msg err" id="appMsg" hidden></div>
 
   <div class="card filters">
     <label>시작일 <input type="date" id="from" value="2026-01-01"></label>
@@ -110,21 +136,21 @@ input[type=text],input[type=number],input[type=search]{height:34px;border:1px so
   <div class="card">
     <div class="tabs" role="tablist">
       <button type="button" class="tab on" data-tab="p1">기간별 국가 매출 (인보이스 기반)</button>
-      <button type="button" class="tab" data-tab="p2">온라인 채널별 매출 (매출 API 기반)</button>
+      <button type="button" class="tab" data-tab="p2">온라인 채널별 매출</button>
     </div>
     <div id="p1" class="panel">
       <p class="sub2">채널·브랜드 필터 연동</p>
       <div class="scroll"><table id="tbl"></table></div>
     </div>
     <div id="p2" class="panel" hidden>
-      <p class="sub2">온라인 채널(Amazon·Qoo10·TikTok Shop) · 필터 연동 · 매출 API 연동 전이라 샘플 데이터로 표시됩니다</p>
+      <p class="sub2">온라인 채널(Amazon·Qoo10·TikTok Shop) · 필터 연동</p>
       <div class="scroll"><table id="tbl2"></table></div>
     </div>
   </div>
 
   <div class="card" id="mgr" style="margin-top:14px">
     <h2>인보이스 데이터 관리</h2>
-    <p class="sub2">등록·업로드·수정한 데이터는 이 브라우저(PC)에 저장되며 위 대시보드에 바로 반영됩니다.</p>
+    <p class="sub2">등록·업로드·수정한 데이터는 회사 공용 DB에 저장되며, 로그인한 직원 모두가 같은 데이터를 봅니다.</p>
     <div class="tabs" role="tablist">
       <button type="button" class="tab on" data-tab="m1">단건 등록</button>
       <button type="button" class="tab" data-tab="m2">일괄 업로드</button>
@@ -180,8 +206,6 @@ input[type=text],input[type=number],input[type=search]{height:34px;border:1px so
       <div class="row-act" style="margin:0 0 10px">
         <input type="search" id="q" placeholder="검색 (일자·인보이스번호·국가·채널·브랜드·바이어)" style="flex:1;min-width:200px">
         <button class="btn danger" type="button" id="delSel">선택 삭제</button>
-        <button class="btn" type="button" id="resetSample">샘플로 초기화</button>
-        <button class="btn danger" type="button" id="delAll">전체 삭제</button>
       </div>
       <div class="scroll"><table id="edit"></table></div>
       <div class="row-act" id="pager"></div>
@@ -189,39 +213,55 @@ input[type=text],input[type=number],input[type=search]{height:34px;border:1px so
   </div>
   <input type="file" id="rowFile" accept=".pdf,image/*,.xlsx,.xls,.csv" hidden>
   <datalist id="dl-country"></datalist><datalist id="dl-channel"></datalist><datalist id="dl-brand"></datalist><datalist id="dl-buyer"></datalist>
-
-  <p class="foot" id="foot">※ 이 파일의 숫자는 예시용 샘플 데이터이며 실제 매출이 아닙니다. 차트·엑셀 업로드는 인터넷 연결 시 동작합니다.</p>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-const RAW = [["2026-01-01","인도네시아","TikTok Shop","AZH",90,3323070,"샘플바이어 인도네시아 A"],["2026-01-02","인도네시아","Amazon","Shemonbred",66,2109360,"샘플바이어 인도네시아 B"],["2026-01-03","싱가포르","팝업","AZH",5,117610,"샘플바이어 싱가포르 A"],["2026-01-04","중국","Qoo10","AZH",31,553505,"샘플바이어 중국 B"],["2026-01-05","미국","팝업","AZH",48,1944768,"샘플바이어 미국 A"],["2026-01-06","미국","Amazon","Tiberias",89,4214328,"샘플바이어 미국 B"],["2026-01-07","미국","B2B","Shemonbred",19,792965,"샘플바이어 미국 A"],["2026-01-08","말레이시아","TikTok Shop","Tiberias",76,1878416,"샘플바이어 말레이시아 B"],["2026-01-09","말레이시아","Qoo10","AZH",15,603720,"샘플바이어 말레이시아 A"],["2026-01-10","싱가포르","팝업","AZH",82,3214646,"샘플바이어 싱가포르 B"],["2026-01-11","싱가포르","Amazon","Shemonbred",89,2771549,"샘플바이어 싱가포르 A"],["2026-01-12","중국","B2B","AZH",19,580241,"샘플바이어 중국 B"],["2026-01-13","중국","TikTok Shop","AZH",78,3647904,"샘플바이어 중국 A"],["2026-01-14","미국","B2B","Tiberias",60,968580,"샘플바이어 미국 B"],["2026-01-15","일본","B2B","AZH",31,642444,"샘플바이어 일본 A"],["2026-01-16","일본","Amazon","AZH",9,381672,"샘플바이어 일본 B"],["2026-01-17","인도네시아","TikTok Shop","AZH",11,524546,"샘플바이어 인도네시아 A"],["2026-01-18","중국","Qoo10","AZH",63,2848356,"샘플바이어 중국 B"],["2026-01-19","일본","Qoo10","AZH",75,2840025,"샘플바이어 일본 A"],["2026-01-20","일본","Qoo10","Shemonbred",5,157900,"샘플바이어 일본 B"],["2026-01-21","일본","Qoo10","Tiberias",69,1146918,"샘플바이어 일본 A"],["2026-01-22","말레이시아","Amazon","Shemonbred",74,3478222,"샘플바이어 말레이시아 B"],["2026-01-23","미국","TikTok Shop","Tiberias",90,2908170,"샘플바이어 미국 A"],["2026-01-24","일본","팝업","AZH",67,2491194,"샘플바이어 일본 B"],["2026-01-25","싱가포르","B2B","Tiberias",25,1085300,"샘플바이어 싱가포르 A"],["2026-01-26","말레이시아","Amazon","AZH",70,3021830,"샘플바이어 말레이시아 B"],["2026-01-27","싱가포르","TikTok Shop","AZH",8,113928,"샘플바이어 싱가포르 A"],["2026-01-01","일본","팝업","Tiberias",58,1337944,"샘플바이어 일본 B"],["2026-02-01","일본","B2B","AZH",12,608340,"샘플바이어 일본 A"],["2026-02-02","미국","B2B","AZH",16,648384,"샘플바이어 미국 B"],["2026-02-03","말레이시아","팝업","AZH",52,2040116,"샘플바이어 말레이시아 A"],["2026-02-04","미국","Qoo10","Shemonbred",9,169047,"샘플바이어 미국 B"],["2026-02-05","말레이시아","Qoo10","Tiberias",53,1083373,"샘플바이어 말레이시아 A"],["2026-02-06","일본","TikTok Shop","AZH",93,4603035,"샘플바이어 일본 B"],["2026-02-07","말레이시아","팝업","AZH",73,2907663,"샘플바이어 말레이시아 A"],["2026-02-08","미국","B2B","AZH",15,536820,"샘플바이어 미국 B"],["2026-02-09","싱가포르","Amazon","Tiberias",44,1134188,"샘플바이어 싱가포르 A"],["2026-02-10","중국","Qoo10","AZH",67,2886159,"샘플바이어 중국 B"],["2026-02-11","일본","Amazon","AZH",48,2109456,"샘플바이어 일본 A"],["2026-02-12","중국","Amazon","Shemonbred",5,188065,"샘플바이어 중국 B"],["2026-02-13","중국","Qoo10","AZH",42,1194564,"샘플바이어 중국 A"],["2026-02-14","말레이시아","TikTok Shop","AZH",64,2526912,"샘플바이어 말레이시아 B"],["2026-02-15","인도네시아","B2B","Tiberias",11,317999,"샘플바이어 인도네시아 A"],["2026-02-16","말레이시아","B2B","AZH",61,1062864,"샘플바이어 말레이시아 B"],["2026-02-17","말레이시아","팝업","AZH",49,740586,"샘플바이어 말레이시아 A"],["2026-02-18","인도네시아","TikTok Shop","AZH",26,595582,"샘플바이어 인도네시아 B"],["2026-02-19","일본","팝업","AZH",68,1156544,"샘플바이어 일본 A"],["2026-02-20","중국","TikTok Shop","AZH",85,2765305,"샘플바이어 중국 B"],["2026-02-21","말레이시아","TikTok Shop","AZH",38,613092,"샘플바이어 말레이시아 A"],["2026-02-22","인도네시아","B2B","AZH",38,1378298,"샘플바이어 인도네시아 B"],["2026-02-23","인도네시아","B2B","AZH",56,1454488,"샘플바이어 인도네시아 A"],["2026-02-24","일본","TikTok Shop","AZH",39,1882101,"샘플바이어 일본 B"],["2026-02-25","싱가포르","TikTok Shop","Shemonbred",44,1011824,"샘플바이어 싱가포르 A"],["2026-02-26","일본","Amazon","AZH",10,148490,"샘플바이어 일본 B"],["2026-02-27","일본","Qoo10","AZH",42,1111110,"샘플바이어 일본 A"],["2026-02-01","중국","팝업","Tiberias",82,1697892,"샘플바이어 중국 B"],["2026-03-01","싱가포르","B2B","AZH",62,1266722,"샘플바이어 싱가포르 A"],["2026-03-02","싱가포르","Qoo10","Tiberias",69,3165306,"샘플바이어 싱가포르 B"],["2026-03-03","인도네시아","TikTok Shop","AZH",54,2224152,"샘플바이어 인도네시아 A"],["2026-03-04","싱가포르","TikTok Shop","AZH",24,1109112,"샘플바이어 싱가포르 B"],["2026-03-05","싱가포르","Amazon","Shemonbred",92,3861424,"샘플바이어 싱가포르 A"],["2026-03-06","말레이시아","TikTok Shop","Tiberias",21,773493,"샘플바이어 말레이시아 B"],["2026-03-07","일본","Amazon","AZH",12,174600,"샘플바이어 일본 A"],["2026-03-08","미국","Amazon","AZH",77,1219603,"샘플바이어 미국 B"],["2026-03-09","말레이시아","B2B","AZH",63,2272221,"샘플바이어 말레이시아 A"],["2026-03-10","싱가포르","팝업","Tiberias",35,1386280,"샘플바이어 싱가포르 B"],["2026-03-11","싱가포르","팝업","AZH",12,452856,"샘플바이어 싱가포르 A"],["2026-03-12","중국","Amazon","Shemonbred",81,1859598,"샘플바이어 중국 B"],["2026-03-13","미국","Qoo10","AZH",66,2809488,"샘플바이어 미국 A"],["2026-03-14","인도네시아","TikTok Shop","AZH",53,2426552,"샘플바이어 인도네시아 B"],["2026-03-15","일본","팝업","AZH",84,3166968,"샘플바이어 일본 A"],["2026-03-16","일본","TikTok Shop","AZH",83,4232087,"샘플바이어 일본 B"],["2026-03-17","말레이시아","B2B","Tiberias",37,1350685,"샘플바이어 말레이시아 A"],["2026-03-18","미국","Amazon","Tiberias",85,3933120,"샘플바이어 미국 B"],["2026-03-19","중국","팝업","AZH",84,2696652,"샘플바이어 중국 A"],["2026-03-20","중국","TikTok Shop","AZH",47,2205663,"샘플바이어 중국 B"],["2026-03-21","미국","Qoo10","AZH",31,1088844,"샘플바이어 미국 A"],["2026-03-22","말레이시아","TikTok Shop","Tiberias",23,769465,"샘플바이어 말레이시아 B"],["2026-03-23","중국","B2B","AZH",47,2313246,"샘플바이어 중국 A"],["2026-03-24","싱가포르","팝업","AZH",37,914899,"샘플바이어 싱가포르 B"],["2026-03-25","미국","TikTok Shop","AZH",61,1767597,"샘플바이어 미국 A"],["2026-03-26","미국","Qoo10","AZH",40,879840,"샘플바이어 미국 B"],["2026-03-27","말레이시아","Qoo10","AZH",44,1937936,"샘플바이어 말레이시아 A"],["2026-03-01","인도네시아","B2B","AZH",54,2027916,"샘플바이어 인도네시아 B"],["2026-04-01","싱가포르","Qoo10","AZH",72,3296232,"샘플바이어 싱가포르 A"],["2026-04-02","중국","B2B","AZH",8,150960,"샘플바이어 중국 B"],["2026-04-03","인도네시아","TikTok Shop","Shemonbred",24,1154376,"샘플바이어 인도네시아 A"],["2026-04-04","말레이시아","TikTok Shop","AZH",59,2426021,"샘플바이어 말레이시아 B"],["2026-04-05","일본","Amazon","AZH",72,2458008,"샘플바이어 일본 A"],["2026-04-06","일본","Qoo10","AZH",75,2916075,"샘플바이어 일본 B"],["2026-04-07","중국","팝업","AZH",29,683675,"샘플바이어 중국 A"],["2026-04-08","인도네시아","팝업","Shemonbred",72,2739888,"샘플바이어 인도네시아 B"],["2026-04-09","일본","Qoo10","Tiberias",75,1582350,"샘플바이어 일본 A"],["2026-04-10","중국","Amazon","AZH",61,1288076,"샘플바이어 중국 B"],["2026-04-11","말레이시아","팝업","AZH",77,1369830,"샘플바이어 말레이시아 A"],["2026-04-12","중국","Amazon","Shemonbred",54,2027106,"샘플바이어 중국 B"],["2026-04-13","미국","Amazon","AZH",71,3111078,"샘플바이어 미국 A"],["2026-04-14","말레이시아","Amazon","Tiberias",52,2142244,"샘플바이어 말레이시아 B"],["2026-04-15","미국","TikTok Shop","Tiberias",72,2314656,"샘플바이어 미국 A"],["2026-04-16","일본","TikTok Shop","AZH",70,2786000,"샘플바이어 일본 B"],["2026-04-17","싱가포르","Amazon","Tiberias",88,3327104,"샘플바이어 싱가포르 A"],["2026-04-18","중국","Amazon","AZH",10,215240,"샘플바이어 중국 B"],["2026-04-19","미국","팝업","AZH",69,3375066,"샘플바이어 미국 A"],["2026-04-20","일본","팝업","Tiberias",50,1431900,"샘플바이어 일본 B"],["2026-04-21","미국","Qoo10","AZH",77,3377528,"샘플바이어 미국 A"],["2026-04-22","일본","TikTok Shop","Tiberias",41,1735817,"샘플바이어 일본 B"],["2026-04-23","일본","Qoo10","Shemonbred",84,3130260,"샘플바이어 일본 A"],["2026-04-24","중국","Amazon","AZH",52,2141880,"샘플바이어 중국 B"],["2026-04-25","중국","Amazon","AZH",73,3556560,"샘플바이어 중국 A"],["2026-04-26","중국","팝업","Tiberias",45,1040850,"샘플바이어 중국 B"],["2026-04-27","중국","Qoo10","Shemonbred",89,2438333,"샘플바이어 중국 A"],["2026-04-01","미국","Amazon","AZH",60,2178720,"샘플바이어 미국 B"],["2026-05-01","미국","B2B","AZH",52,1807000,"샘플바이어 미국 A"],["2026-05-02","미국","TikTok Shop","AZH",66,1805364,"샘플바이어 미국 B"],["2026-05-03","말레이시아","Amazon","Tiberias",90,4085730,"샘플바이어 말레이시아 A"],["2026-05-04","일본","팝업","AZH",64,3135104,"샘플바이어 일본 B"],["2026-05-05","싱가포르","TikTok Shop","Shemonbred",91,2077712,"샘플바이어 싱가포르 A"],["2026-05-06","말레이시아","B2B","Tiberias",24,516336,"샘플바이어 말레이시아 B"],["2026-05-07","싱가포르","B2B","AZH",37,689162,"샘플바이어 싱가포르 A"],["2026-05-08","인도네시아","B2B","AZH",60,2379960,"샘플바이어 인도네시아 B"],["2026-05-09","일본","팝업","AZH",88,2062984,"샘플바이어 일본 A"],["2026-05-10","말레이시아","Qoo10","Tiberias",85,2138005,"샘플바이어 말레이시아 B"],["2026-05-11","일본","B2B","Tiberias",67,1552055,"샘플바이어 일본 A"],["2026-05-12","미국","B2B","AZH",93,4727190,"샘플바이어 미국 B"],["2026-05-13","일본","B2B","Tiberias",23,736874,"샘플바이어 일본 A"],["2026-05-14","말레이시아","TikTok Shop","AZH",55,1357455,"샘플바이어 말레이시아 B"],["2026-05-15","말레이시아","팝업","AZH",59,986185,"샘플바이어 말레이시아 A"],["2026-05-16","말레이시아","Qoo10","Shemonbred",85,3613605,"샘플바이어 말레이시아 B"],["2026-05-17","싱가포르","Amazon","AZH",7,101808,"샘플바이어 싱가포르 A"],["2026-05-18","싱가포르","팝업","AZH",43,2175026,"샘플바이어 싱가포르 B"],["2026-05-19","미국","B2B","AZH",95,4666685,"샘플바이어 미국 A"],["2026-05-20","말레이시아","Qoo10","Tiberias",13,321230,"샘플바이어 말레이시아 B"],["2026-05-21","미국","TikTok Shop","Shemonbred",6,143346,"샘플바이어 미국 A"],["2026-05-22","미국","Amazon","AZH",52,1624688,"샘플바이어 미국 B"],["2026-05-23","싱가포르","TikTok Shop","AZH",89,2232031,"샘플바이어 싱가포르 A"],["2026-05-24","말레이시아","Amazon","Tiberias",60,2437560,"샘플바이어 말레이시아 B"],["2026-05-25","중국","TikTok Shop","Shemonbred",18,638586,"샘플바이어 중국 A"],["2026-05-26","일본","TikTok Shop","Tiberias",37,1679541,"샘플바이어 일본 B"],["2026-05-27","중국","Amazon","AZH",56,810656,"샘플바이어 중국 A"],["2026-05-01","일본","B2B","Shemonbred",91,4477564,"샘플바이어 일본 B"],["2026-06-01","싱가포르","B2B","AZH",16,388608,"샘플바이어 싱가포르 A"],["2026-06-02","일본","B2B","AZH",43,1267425,"샘플바이어 일본 B"],["2026-06-03","미국","Qoo10","AZH",55,2791085,"샘플바이어 미국 A"],["2026-06-04","싱가포르","Qoo10","Shemonbred",13,534443,"샘플바이어 싱가포르 B"],["2026-06-05","미국","팝업","AZH",53,762458,"샘플바이어 미국 A"],["2026-06-06","인도네시아","TikTok Shop","AZH",44,1590952,"샘플바이어 인도네시아 B"],["2026-06-07","미국","Amazon","AZH",35,1100785,"샘플바이어 미국 A"],["2026-06-08","미국","B2B","AZH",84,1230768,"샘플바이어 미국 B"],["2026-06-09","중국","Amazon","AZH",92,2153444,"샘플바이어 중국 A"],["2026-06-10","중국","팝업","Tiberias",52,1444872,"샘플바이어 중국 B"],["2026-06-11","인도네시아","팝업","AZH",15,760185,"샘플바이어 인도네시아 A"],["2026-06-12","인도네시아","Qoo10","AZH",27,1257903,"샘플바이어 인도네시아 B"],["2026-06-13","인도네시아","Amazon","AZH",24,815736,"샘플바이어 인도네시아 A"],["2026-06-14","미국","Amazon","AZH",12,208260,"샘플바이어 미국 B"],["2026-06-15","중국","Amazon","Shemonbred",26,1294982,"샘플바이어 중국 A"],["2026-06-16","싱가포르","B2B","Tiberias",47,1041238,"샘플바이어 싱가포르 B"],["2026-06-17","인도네시아","Amazon","Shemonbred",12,539148,"샘플바이어 인도네시아 A"],["2026-06-18","말레이시아","TikTok Shop","AZH",66,3077778,"샘플바이어 말레이시아 B"],["2026-06-19","말레이시아","Qoo10","AZH",56,1268904,"샘플바이어 말레이시아 A"],["2026-06-20","말레이시아","Amazon","Shemonbred",47,1185810,"샘플바이어 말레이시아 B"],["2026-06-21","인도네시아","TikTok Shop","AZH",14,386134,"샘플바이어 인도네시아 A"],["2026-06-22","일본","팝업","AZH",68,3445968,"샘플바이어 일본 B"],["2026-06-23","일본","팝업","AZH",89,3793981,"샘플바이어 일본 A"],["2026-06-24","일본","TikTok Shop","Shemonbred",75,3490425,"샘플바이어 일본 B"],["2026-06-25","싱가포르","Qoo10","Shemonbred",27,415665,"샘플바이어 싱가포르 A"],["2026-06-26","일본","팝업","AZH",57,2900958,"샘플바이어 일본 B"],["2026-06-27","인도네시아","TikTok Shop","AZH",63,2672271,"샘플바이어 인도네시아 A"],["2026-06-01","싱가포르","팝업","AZH",86,4151220,"샘플바이어 싱가포르 B"],["2026-07-01","말레이시아","팝업","AZH",23,617113,"샘플바이어 말레이시아 A"],["2026-07-02","미국","Amazon","AZH",61,973255,"샘플바이어 미국 B"],["2026-07-03","인도네시아","Amazon","AZH",12,324900,"샘플바이어 인도네시아 A"],["2026-07-04","미국","TikTok Shop","AZH",86,4307740,"샘플바이어 미국 B"],["2026-07-05","인도네시아","팝업","AZH",55,1519595,"샘플바이어 인도네시아 A"],["2026-07-06","일본","Amazon","Shemonbred",31,1426682,"샘플바이어 일본 B"],["2026-07-07","일본","Qoo10","AZH",74,1323638,"샘플바이어 일본 A"],["2026-07-08","말레이시아","Qoo10","AZH",53,2030059,"샘플바이어 말레이시아 B"],["2026-07-09","말레이시아","B2B","AZH",75,3490500,"샘플바이어 말레이시아 A"],["2026-07-10","미국","Qoo10","AZH",66,2859384,"샘플바이어 미국 B"],["2026-07-11","싱가포르","TikTok Shop","AZH",31,921165,"샘플바이어 싱가포르 A"],["2026-07-12","말레이시아","팝업","Tiberias",16,263072,"샘플바이어 말레이시아 B"],["2026-07-13","미국","팝업","Shemonbred",40,1364120,"샘플바이어 미국 A"],["2026-07-14","일본","Amazon","AZH",62,2804818,"샘플바이어 일본 B"],["2026-07-15","싱가포르","TikTok Shop","AZH",6,152874,"샘플바이어 싱가포르 A"],["2026-07-16","말레이시아","팝업","Shemonbred",83,3828707,"샘플바이어 말레이시아 B"],["2026-07-17","일본","B2B","AZH",77,1257256,"샘플바이어 일본 A"],["2026-07-18","인도네시아","TikTok Shop","AZH",55,1573385,"샘플바이어 인도네시아 B"],["2026-07-19","싱가포르","TikTok Shop","AZH",42,1888824,"샘플바이어 싱가포르 A"],["2026-07-20","인도네시아","TikTok Shop","AZH",23,419819,"샘플바이어 인도네시아 B"],["2026-07-21","미국","Qoo10","Tiberias",79,3274708,"샘플바이어 미국 A"],["2026-07-22","중국","Amazon","AZH",17,537013,"샘플바이어 중국 B"],["2026-07-23","인도네시아","팝업","AZH",87,2617569,"샘플바이어 인도네시아 A"],["2026-07-24","인도네시아","Qoo10","Tiberias",60,1523280,"샘플바이어 인도네시아 B"],["2026-07-25","말레이시아","팝업","Tiberias",36,1128960,"샘플바이어 말레이시아 A"],["2026-07-26","중국","B2B","AZH",21,665133,"샘플바이어 중국 B"],["2026-07-27","말레이시아","Qoo10","AZH",34,915756,"샘플바이어 말레이시아 A"],["2026-07-01","미국","Amazon","AZH",82,3861298,"샘플바이어 미국 B"],["2026-08-01","인도네시아","B2B","Shemonbred",27,1038258,"샘플바이어 인도네시아 A"],["2026-08-02","싱가포르","팝업","AZH",20,679700,"샘플바이어 싱가포르 B"],["2026-08-03","말레이시아","B2B","Tiberias",56,2304232,"샘플바이어 말레이시아 A"],["2026-08-04","말레이시아","TikTok Shop","AZH",64,2189056,"샘플바이어 말레이시아 B"],["2026-08-05","말레이시아","팝업","AZH",27,874989,"샘플바이어 말레이시아 A"],["2026-08-06","미국","TikTok Shop","AZH",21,868350,"샘플바이어 미국 B"],["2026-08-07","일본","Qoo10","Shemonbred",84,2929668,"샘플바이어 일본 A"],["2026-08-08","말레이시아","팝업","AZH",22,744348,"샘플바이어 말레이시아 B"],["2026-08-09","말레이시아","B2B","AZH",33,1669371,"샘플바이어 말레이시아 A"],["2026-08-10","싱가포르","B2B","AZH",18,502740,"샘플바이어 싱가포르 B"],["2026-08-11","인도네시아","TikTok Shop","Shemonbred",50,1420700,"샘플바이어 인도네시아 A"],["2026-08-12","말레이시아","팝업","Tiberias",46,2333488,"샘플바이어 말레이시아 B"],["2026-08-13","일본","B2B","Tiberias",60,2717640,"샘플바이어 일본 A"],["2026-08-14","말레이시아","Qoo10","AZH",59,2310322,"샘플바이어 말레이시아 B"],["2026-08-15","일본","Qoo10","Tiberias",64,2155648,"샘플바이어 일본 A"],["2026-08-16","싱가포르","TikTok Shop","AZH",79,3764113,"샘플바이어 싱가포르 B"],["2026-08-17","싱가포르","B2B","AZH",85,1365695,"샘플바이어 싱가포르 A"],["2026-08-18","미국","Amazon","AZH",26,1241994,"샘플바이어 미국 B"],["2026-08-19","말레이시아","Amazon","AZH",66,1905156,"샘플바이어 말레이시아 A"],["2026-08-20","싱가포르","팝업","AZH",5,209425,"샘플바이어 싱가포르 B"],["2026-08-21","말레이시아","Qoo10","AZH",48,2270400,"샘플바이어 말레이시아 A"],["2026-08-22","미국","Amazon","Shemonbred",88,3630792,"샘플바이어 미국 B"],["2026-08-23","인도네시아","Amazon","AZH",60,2893920,"샘플바이어 인도네시아 A"],["2026-08-24","인도네시아","Qoo10","Shemonbred",72,3081384,"샘플바이어 인도네시아 B"],["2026-08-25","인도네시아","팝업","Shemonbred",92,2075520,"샘플바이어 인도네시아 A"],["2026-08-26","말레이시아","TikTok Shop","AZH",88,4183520,"샘플바이어 말레이시아 B"],["2026-08-27","말레이시아","팝업","AZH",76,2138868,"샘플바이어 말레이시아 A"],["2026-08-01","중국","팝업","AZH",18,582840,"샘플바이어 중국 B"],["2026-09-01","미국","TikTok Shop","AZH",72,1334160,"샘플바이어 미국 A"],["2026-09-02","중국","B2B","AZH",57,2165031,"샘플바이어 중국 B"],["2026-09-03","미국","팝업","AZH",81,3933441,"샘플바이어 미국 A"],["2026-09-04","싱가포르","팝업","Tiberias",69,2879163,"샘플바이어 싱가포르 B"],["2026-09-05","말레이시아","팝업","AZH",46,1820082,"샘플바이어 말레이시아 A"],["2026-09-06","인도네시아","Amazon","AZH",60,2940120,"샘플바이어 인도네시아 B"],["2026-09-07","말레이시아","Amazon","AZH",77,1576498,"샘플바이어 말레이시아 A"],["2026-09-08","중국","TikTok Shop","Tiberias",11,364595,"샘플바이어 중국 B"],["2026-09-09","말레이시아","TikTok Shop","AZH",58,1146950,"샘플바이어 말레이시아 A"],["2026-09-10","싱가포르","TikTok Shop","AZH",17,521526,"샘플바이어 싱가포르 B"],["2026-09-11","말레이시아","팝업","AZH",95,1825140,"샘플바이어 말레이시아 A"],["2026-09-12","중국","B2B","Tiberias",9,163710,"샘플바이어 중국 B"],["2026-09-13","미국","팝업","AZH",29,1034865,"샘플바이어 미국 A"],["2026-09-14","일본","B2B","Shemonbred",62,2263930,"샘플바이어 일본 B"],["2026-09-15","인도네시아","TikTok Shop","AZH",8,201288,"샘플바이어 인도네시아 A"],["2026-09-16","일본","Amazon","AZH",93,1628430,"샘플바이어 일본 B"],["2026-09-17","중국","B2B","AZH",34,725934,"샘플바이어 중국 A"],["2026-09-18","인도네시아","TikTok Shop","AZH",11,284295,"샘플바이어 인도네시아 B"],["2026-09-19","미국","Qoo10","AZH",37,1766158,"샘플바이어 미국 A"],["2026-09-20","싱가포르","Qoo10","AZH",90,3337380,"샘플바이어 싱가포르 B"],["2026-09-21","말레이시아","Qoo10","AZH",58,2817582,"샘플바이어 말레이시아 A"],["2026-09-22","미국","Amazon","AZH",70,3170790,"샘플바이어 미국 B"],["2026-09-23","말레이시아","TikTok Shop","Shemonbred",69,2116299,"샘플바이어 말레이시아 A"],["2026-09-24","말레이시아","TikTok Shop","AZH",14,392616,"샘플바이어 말레이시아 B"],["2026-09-25","말레이시아","TikTok Shop","AZH",59,842402,"샘플바이어 말레이시아 A"],["2026-09-26","일본","팝업","AZH",68,2574412,"샘플바이어 일본 B"],["2026-09-27","인도네시아","TikTok Shop","Tiberias",22,509454,"샘플바이어 인도네시아 A"],["2026-09-01","싱가포르","B2B","AZH",79,2030379,"샘플바이어 싱가포르 B"],["2026-10-01","중국","Amazon","AZH",18,895392,"샘플바이어 중국 A"],["2026-10-02","말레이시아","B2B","AZH",49,1018269,"샘플바이어 말레이시아 B"],["2026-10-03","일본","TikTok Shop","Tiberias",49,1631700,"샘플바이어 일본 A"],["2026-10-04","말레이시아","팝업","AZH",25,1063400,"샘플바이어 말레이시아 B"],["2026-10-05","미국","Qoo10","Tiberias",58,1495066,"샘플바이어 미국 A"],["2026-10-06","말레이시아","B2B","AZH",21,952812,"샘플바이어 말레이시아 B"],["2026-10-07","미국","TikTok Shop","AZH",22,380424,"샘플바이어 미국 A"],["2026-10-08","일본","TikTok Shop","Tiberias",56,2418136,"샘플바이어 일본 B"],["2026-10-09","중국","TikTok Shop","AZH",87,2881092,"샘플바이어 중국 A"],["2026-10-10","미국","TikTok Shop","AZH",43,2142002,"샘플바이어 미국 B"],["2026-10-11","인도네시아","B2B","AZH",39,732576,"샘플바이어 인도네시아 A"],["2026-10-12","중국","팝업","AZH",27,393228,"샘플바이어 중국 B"],["2026-10-13","미국","Qoo10","AZH",29,1343628,"샘플바이어 미국 A"],["2026-10-14","중국","Qoo10","Tiberias",11,498729,"샘플바이어 중국 B"],["2026-10-15","말레이시아","Amazon","Shemonbred",33,1293798,"샘플바이어 말레이시아 A"],["2026-10-16","미국","Amazon","AZH",25,748000,"샘플바이어 미국 B"],["2026-10-17","일본","Amazon","AZH",30,1310970,"샘플바이어 일본 A"],["2026-10-18","인도네시아","Amazon","AZH",23,851759,"샘플바이어 인도네시아 B"],["2026-10-19","일본","Amazon","AZH",73,1861865,"샘플바이어 일본 A"],["2026-10-20","중국","B2B","Tiberias",25,599075,"샘플바이어 중국 B"],["2026-10-21","일본","Qoo10","AZH",24,773184,"샘플바이어 일본 A"],["2026-10-22","중국","팝업","Tiberias",11,547107,"샘플바이어 중국 B"],["2026-10-23","중국","팝업","Tiberias",13,639067,"샘플바이어 중국 A"],["2026-10-24","일본","Amazon","Shemonbred",38,1388634,"샘플바이어 일본 B"],["2026-10-25","미국","TikTok Shop","AZH",95,3142410,"샘플바이어 미국 A"],["2026-10-26","싱가포르","B2B","AZH",40,841440,"샘플바이어 싱가포르 B"],["2026-10-27","말레이시아","Amazon","Tiberias",64,2657792,"샘플바이어 말레이시아 A"],["2026-10-01","미국","팝업","Tiberias",31,873115,"샘플바이어 미국 B"],["2026-11-01","싱가포르","B2B","AZH",41,1987885,"샘플바이어 싱가포르 A"],["2026-11-02","중국","팝업","AZH",27,418257,"샘플바이어 중국 B"],["2026-11-03","말레이시아","TikTok Shop","AZH",78,3566238,"샘플바이어 말레이시아 A"],["2026-11-04","일본","팝업","Tiberias",13,617292,"샘플바이어 일본 B"],["2026-11-05","중국","TikTok Shop","AZH",77,2483019,"샘플바이어 중국 A"],["2026-11-06","인도네시아","Amazon","Tiberias",32,1344672,"샘플바이어 인도네시아 B"],["2026-11-07","중국","팝업","AZH",52,2517528,"샘플바이어 중국 A"],["2026-11-08","일본","B2B","AZH",14,316456,"샘플바이어 일본 B"],["2026-11-09","미국","팝업","AZH",89,1431476,"샘플바이어 미국 A"],["2026-11-10","인도네시아","TikTok Shop","Shemonbred",13,481091,"샘플바이어 인도네시아 B"],["2026-11-11","일본","TikTok Shop","AZH",24,478680,"샘플바이어 일본 A"],["2026-11-12","미국","팝업","AZH",37,1005401,"샘플바이어 미국 B"],["2026-11-13","싱가포르","Amazon","AZH",95,4259420,"샘플바이어 싱가포르 A"],["2026-11-14","인도네시아","팝업","AZH",84,2755032,"샘플바이어 인도네시아 B"],["2026-11-15","중국","Qoo10","AZH",24,401520,"샘플바이어 중국 A"],["2026-11-16","중국","Amazon","AZH",72,2662704,"샘플바이어 중국 B"],["2026-11-17","인도네시아","Qoo10","AZH",33,1383228,"샘플바이어 인도네시아 A"],["2026-11-18","싱가포르","TikTok Shop","Tiberias",39,1852890,"샘플바이어 싱가포르 B"],["2026-11-19","싱가포르","B2B","AZH",37,903984,"샘플바이어 싱가포르 A"],["2026-11-20","인도네시아","TikTok Shop","Shemonbred",29,930552,"샘플바이어 인도네시아 B"],["2026-11-21","싱가포르","팝업","Shemonbred",78,2377674,"샘플바이어 싱가포르 A"],["2026-11-22","인도네시아","TikTok Shop","AZH",37,1792317,"샘플바이어 인도네시아 B"],["2026-11-23","인도네시아","Qoo10","AZH",70,2444190,"샘플바이어 인도네시아 A"],["2026-11-24","미국","팝업","AZH",58,1222698,"샘플바이어 미국 B"],["2026-11-25","싱가포르","B2B","AZH",31,491784,"샘플바이어 싱가포르 A"],["2026-11-26","중국","TikTok Shop","AZH",93,1846329,"샘플바이어 중국 B"],["2026-11-27","일본","팝업","Tiberias",12,550632,"샘플바이어 일본 A"],["2026-11-01","중국","TikTok Shop","AZH",39,1693302,"샘플바이어 중국 B"],["2026-12-01","중국","Qoo10","AZH",13,239707,"샘플바이어 중국 A"],["2026-12-02","중국","TikTok Shop","AZH",26,756340,"샘플바이어 중국 B"],["2026-12-03","말레이시아","Amazon","AZH",30,1219380,"샘플바이어 말레이시아 A"],["2026-12-04","싱가포르","팝업","Tiberias",53,1123441,"샘플바이어 싱가포르 B"],["2026-12-05","중국","Qoo10","Tiberias",29,1160319,"샘플바이어 중국 A"],["2026-12-06","일본","TikTok Shop","AZH",85,2515065,"샘플바이어 일본 B"],["2026-12-07","싱가포르","Qoo10","AZH",37,1656601,"샘플바이어 싱가포르 A"],["2026-12-08","미국","TikTok Shop","AZH",76,3684480,"샘플바이어 미국 B"],["2026-12-09","미국","팝업","Shemonbred",30,800940,"샘플바이어 미국 A"],["2026-12-10","중국","Amazon","Shemonbred",9,220473,"샘플바이어 중국 B"],["2026-12-11","중국","Amazon","AZH",13,587353,"샘플바이어 중국 A"],["2026-12-12","싱가포르","팝업","Tiberias",66,2088900,"샘플바이어 싱가포르 B"],["2026-12-13","미국","팝업","AZH",25,1028000,"샘플바이어 미국 A"],["2026-12-14","인도네시아","Amazon","AZH",76,3232964,"샘플바이어 인도네시아 B"],["2026-12-15","인도네시아","Amazon","AZH",76,2223380,"샘플바이어 인도네시아 A"],["2026-12-16","미국","Amazon","Tiberias",73,1890992,"샘플바이어 미국 B"],["2026-12-17","미국","Amazon","AZH",74,3766156,"샘플바이어 미국 A"],["2026-12-18","싱가포르","B2B","Shemonbred",17,503659,"샘플바이어 싱가포르 B"],["2026-12-19","인도네시아","Amazon","AZH",69,2526366,"샘플바이어 인도네시아 A"],["2026-12-20","인도네시아","팝업","AZH",25,489075,"샘플바이어 인도네시아 B"],["2026-12-21","인도네시아","Qoo10","AZH",57,1408185,"샘플바이어 인도네시아 A"],["2026-12-22","인도네시아","Amazon","Shemonbred",5,141360,"샘플바이어 인도네시아 B"],["2026-12-23","중국","Qoo10","AZH",44,1758328,"샘플바이어 중국 A"],["2026-12-24","말레이시아","Qoo10","Shemonbred",68,2644384,"샘플바이어 말레이시아 B"],["2026-12-25","일본","팝업","AZH",25,755825,"샘플바이어 일본 A"],["2026-12-26","미국","Qoo10","Tiberias",13,444132,"샘플바이어 미국 B"],["2026-12-27","인도네시아","Amazon","AZH",62,1932912,"샘플바이어 인도네시아 A"],["2026-12-01","미국","TikTok Shop","AZH",69,1789170,"샘플바이어 미국 B"]];
-// 데이터 저장: 행은 localStorage, 인보이스 파일 원본은 IndexedDB(인보이스번호 기준)
-const STORE_KEY = "ovs-sales-rows-v1", FILES_KEY = "ovs-invoice-files-v1";
-const SAMPLE = RAW.map((r,i) => ({id:"s"+i, date:r[0], invoice:"", country:r[1], channel:r[2], brand:r[3], buyer:r[6], qty:r[4], amount:r[5]}));
-const readLS = (k, fb) => { try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : fb; } catch (e) { return fb; } };
-const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
-let rows = readLS(STORE_KEY, null) || SAMPLE.map(r => ({...r}));
-let FILES = readLS(FILES_KEY, {});
-const saveRows = () => writeLS(STORE_KEY, rows) || alert("브라우저 저장소에 저장하지 못했습니다. (용량 초과 또는 저장소 차단)");
-const newId = () => "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-const idb = (() => {
-  let p;
-  const open = () => p ||= new Promise((res, rej) => {
-    const q = indexedDB.open("ovs-invoice-files", 1);
-    q.onupgradeneeded = () => q.result.createObjectStore("files");
-    q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
-  });
-  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => {
-    const t = db.transaction("files", mode), r = fn(t.objectStore("files"));
-    t.oncomplete = () => res(r.result); t.onerror = () => rej(t.error);
-  }));
-  return {put:(k,v)=>tx("readwrite",s=>s.put(v,k)), get:k=>tx("readonly",s=>s.get(k)), clear:()=>tx("readwrite",s=>s.clear())};
-})();
+// Supabase: 공개(publishable) 키라 페이지에 두어도 되며, 데이터 접근은 DB의 RLS(회사 메일 로그인만 허용)로 막는다
+const SB_URL = "https://fbfvhfxiudoudvezldfk.supabase.co";
+const SB_KEY = "sb_publishable_rARPqs2WRdY3V94HCF5sMA_t-ONEk_v";
+const COMPANY_DOMAIN = "@interohrigin.com";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const BUCKET = "invoices";
+
+let rows = [];   // {id, date, invoice, country, channel, brand, buyer, qty, amount}
+let FILES = {};  // 인보이스번호 → {name, path}
+const fromDb = d => ({id:d.id, date:d.sale_date, invoice:d.invoice_no, country:d.country, channel:d.channel, brand:d.brand, buyer:d.buyer, qty:Number(d.qty), amount:Number(d.amount)});
+const toDb = r => ({sale_date:r.date, invoice_no:r.invoice, country:r.country, channel:r.channel, brand:r.brand, buyer:r.buyer, qty:r.qty, amount:r.amount});
+const chunk = (a, n) => Array.from({length:Math.ceil(a.length / n)}, (_, i) => a.slice(i * n, (i + 1) * n));
+
+async function loadAll() {
+  const all = [];
+  for (let from = 0; ; from += 1000) {   // 한 번에 최대 1000행이라 나눠서 읽는다
+    const {data, error} = await sb.from("overseas_sales").select("*").order("sale_date").order("created_at").range(from, from + 999);
+    if (error) throw error;
+    all.push(...data);
+    if (data.length < 1000) break;
+  }
+  const {data: files, error} = await sb.from("invoice_files").select("invoice_no,file_name,storage_path");
+  if (error) throw error;
+  rows = all.map(fromDb);
+  FILES = Object.fromEntries(files.map(f => [f.invoice_no, {name:f.file_name, path:f.storage_path}]));
+}
+async function reload() {
+  try { await loadAll(); $("appMsg").hidden = true; }
+  catch (e) { $("appMsg").textContent = "데이터를 불러오지 못했습니다: " + e.message; $("appMsg").hidden = false; }
+  refreshAll();
+}
 async function saveFile(invoice, file) {
-  await idb.put("inv:" + invoice, file);
-  FILES[invoice] = file.name; writeLS(FILES_KEY, FILES);
+  const ext = (file.name.match(/\.([A-Za-z0-9]{1,8})$/) || [, "bin"])[1].toLowerCase();
+  const slug = invoice.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 60) || "invoice";
+  const path = `inv/${slug}/${Date.now()}.${ext}`;
+  const up = await sb.storage.from(BUCKET).upload(path, file, {contentType:file.type || undefined});
+  if (up.error) throw up.error;
+  const {error} = await sb.from("invoice_files").upsert({invoice_no:invoice, file_name:file.name, storage_path:path});
+  if (error) throw error;
+  const old = FILES[invoice];
+  if (old && old.path !== path) sb.storage.from(BUCKET).remove([old.path]);
+  FILES[invoice] = {name:file.name, path};
 }
 
 const COLORS = ["#2563eb","#7c3aed","#db2777","#ea580c","#16a34a","#0891b2"];
@@ -242,9 +282,9 @@ function prevRange(from,to){
   return {from:iso(new Date(f-days*864e5)), to:iso(new Date(f-864e5))};
 }
 
-// 채널 분류: 이커머스(Amazon·Qoo10·TikTok Shop)=온라인, B2B·팝업=오프라인. 수출구분은 기본 직접수출(아래 선택으로 변경)
+// 채널 분류: 이커머스(Amazon·Qoo10·TikTok Shop)=온라인, 그 외=오프라인. 수출구분은 기본 직접수출(아래 선택으로 변경)
 const ONLINE = new Set(["Amazon","Qoo10","TikTok Shop"]);
-const EXPORT_TYPE = {};
+const EXPORT_TYPE = (() => { try { return JSON.parse(localStorage.getItem("ovs-export-type") || "{}"); } catch (e) { return {}; } })();
 // 데이터가 바뀌면 필터 목록·수출구분 선택·입력 자동완성을 다시 만든다
 function refreshOptions() {
   for (const id of ["country","channel","brand"]) {
@@ -257,18 +297,18 @@ function refreshOptions() {
   $("clsList").innerHTML = chs.map(c => `<label>${esc(c)} <select data-ch="${esc(c)}">` +
     ["직접수출","간접수출"].map(t=>`<option${EXPORT_TYPE[c]===t?" selected":""}>${t}</option>`).join("") + `</select></label>`).join("");
   for (const k of ["country","channel","brand","buyer"]) $("dl-"+k).innerHTML = uniq(k).map(v=>`<option value="${esc(v)}">`).join("");
-  const sample = rows.length > 0 && rows.every(r => r.id.startsWith("s"));
-  $("badge").textContent = sample ? "샘플 데이터" : "샘플 + 등록 데이터";
-  $("badge").style.display = rows.some(r => r.id.startsWith("s")) ? "" : "none";
-  $("foot").hidden = !rows.some(r => r.id.startsWith("s"));
 }
-refreshOptions();
-$("cls").addEventListener("change", e => { if (e.target.dataset.ch) { EXPORT_TYPE[e.target.dataset.ch] = e.target.value; render(); } });
+$("cls").addEventListener("change", e => {
+  if (!e.target.dataset.ch) return;
+  EXPORT_TYPE[e.target.dataset.ch] = e.target.value;
+  try { localStorage.setItem("ovs-export-type", JSON.stringify(EXPORT_TYPE)); } catch (err) {}
+  render();
+});
 const SPLIT = ["#2563eb","#ea580c"];
 function splitHtml(items) {
   const tot = items.reduce((a,i)=>a+i.value,0);
   return '<div class="bar">' + items.map((i,k)=>`<div style="width:${tot?i.value/tot*100:0}%;background:${SPLIT[k]}"></div>`).join("") + '</div>' +
-    '<ul class="leg">' + items.map((i,k)=>`<li><span><span class="dot" style="background:${SPLIT[k]}"></span>${i.name}${i.note?` <span class="sub2">${i.note}</span>`:""}</span><span>${won(i.value)} <span class="sub2">(${pct(tot?i.value/tot:0)})</span></span></li>`).join("") + '</ul>';
+    '<ul class="leg">' + items.map((i,k)=>`<li><span><span class="dot" style="background:${SPLIT[k]}"></span>${i.name}${i.note?` <span class="sub2">${esc(i.note)}</span>`:""}</span><span>${won(i.value)} <span class="sub2">(${pct(tot?i.value/tot:0)})</span></span></li>`).join("") + '</ul>';
 }
 
 const charts = {};
@@ -278,7 +318,7 @@ function draw(id, type, labels, data, opts={}) {
   const txt = getComputedStyle(document.body).color;
   const pie = type==="doughnut"||type==="pie";
   charts[id] = new Chart($(id), {
-    type, data:{labels, datasets:[{data, backgroundColor: pie||type==="bar" ? COLORS : undefined, borderColor: type==="line"?"#7c3aed":undefined, backgroundColor: type==="line"?"#7c3aed":COLORS, tension:.3, borderWidth: type==="line"?2:0}]},
+    type, data:{labels, datasets:[{data, borderColor: type==="line"?"#7c3aed":undefined, backgroundColor: type==="line"?"#7c3aed":COLORS, tension:.3, borderWidth: type==="line"?2:0}]},
     options:{maintainAspectRatio:false, animation:false, plugins:{legend:{display:pie, position:"bottom", labels:{color:txt}}, tooltip:{callbacks:{label:c=>" "+won(c.parsed.y ?? c.parsed)}}},
       scales: pie ? {} : {x:{ticks:{color:txt},grid:{display:false}}, y:{ticks:{color:txt, callback:v=>(v/10000).toLocaleString()+"만"}}}, ...opts}
   });
@@ -292,7 +332,7 @@ function render() {
   const change = prevTotal ? total/prevTotal-1 : 0;
   $("k1").textContent = won(total);
   $("k2").textContent = sum(cur,"qty").toLocaleString("ko-KR")+"개";
-  $("k3").innerHTML = `<span class="${change>=0?"up":"down"}">${change>=0?"+":""}${pct(change)}</span>`;
+  $("k3").innerHTML = prevTotal ? `<span class="${change>=0?"up":"down"}">${change>=0?"+":""}${pct(change)}</span>` : '<span class="sub2">비교 데이터 없음</span>';
 
   const chans = [...new Set(cur.map(r=>r.channel))];
   const on = cur.filter(r=>ONLINE.has(r.channel)), off = cur.filter(r=>!ONLINE.has(r.channel));
@@ -304,29 +344,29 @@ function render() {
   draw("c1","pie",gC.map(x=>x.name),gC.map(x=>x.value));
   draw("c2","bar",gCh.map(x=>x.name),gCh.map(x=>x.value));
   draw("c3","doughnut",gB.map(x=>x.name),gB.map(x=>x.value));
-  const m=new Map(); cur.forEach(r=>{const k=r.date.slice(5,7); m.set(k,(m.get(k)||0)+r.amount)});
+  const m=new Map(); cur.forEach(r=>{const k=r.date.slice(0,7); m.set(k,(m.get(k)||0)+r.amount)});
   const months=[...m].sort();
-  draw("c4","line",months.map(x=>x[0]+"월"),months.map(x=>x[1]));
+  draw("c4","line",months.map(x=>x[0].replace("-",".")),months.map(x=>x[1]));
 
-  const base = filt({...f, country:""}), basePrev = p ? filt({...f, country:"", ...p}) : [];
+  const base = filt({...f, country:""});
   const bt = sum(base,"amount");
-  const rowHtml = (label, cur, prev, cls) => {
-    const v = sum(cur,"amount"), b = sum(prev,"amount"), d = v-b;
+  const rowHtml = (label, cur, cls) => {
+    const v = sum(cur,"amount");
     return `<tr class="${cls}"><td>${esc(label)}</td><td>${won(v)}</td><td>${pct(bt?v/bt:0)}</td></tr>`;
   };
   let html = "<tr>"+["국가 / 바이어명 / 브랜드","선택 기간 매출","매출 비중"].map(h=>`<th>${h}</th>`).join("")+"</tr>";
   group(base,"country").forEach(c=>{
-    const cur = base.filter(r=>r.country===c.name), prev = basePrev.filter(r=>r.country===c.name);
-    html += rowHtml(c.name + " 합계", cur, prev, "country");
+    const cur = base.filter(r=>r.country===c.name);
+    html += rowHtml(c.name + " 합계", cur, "country");
     [...new Set(cur.map(r=>r.buyer))].sort().forEach(b=>{
-      const bc = cur.filter(r=>r.buyer===b), bp = prev.filter(r=>r.buyer===b);
-      html += rowHtml("└ " + (b || "(바이어 미입력)"), bc, bp, "buyer");
+      const bc = cur.filter(r=>r.buyer===b);
+      html += rowHtml("└ " + (b || "(바이어 미입력)"), bc, "buyer");
       [...new Set(bc.map(r=>r.brand))].sort().forEach(br=>{
-        html += rowHtml("└ " + br, bc.filter(r=>r.brand===br), bp.filter(r=>r.brand===br), "brand");
+        html += rowHtml("└ " + br, bc.filter(r=>r.brand===br), "brand");
       });
     });
   });
-  html += rowHtml("전체 합계", base, basePrev, "total");
+  html += base.length ? rowHtml("전체 합계", base, "total") : `<tr><td colspan="3" class="empty">데이터가 없습니다. 아래 인보이스 데이터 관리에서 등록하거나 엑셀로 일괄 업로드하세요.</td></tr>`;
   $("tbl").innerHTML = html;
 
   // 두 번째 탭: 온라인 채널별 매출 (채널 합계 → 국가별)
@@ -347,7 +387,6 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
   box.querySelectorAll(".panel").forEach(p => p.hidden = p.id !== b.dataset.tab);
 }));
 ["from","to","country","channel","brand"].forEach(id=>$(id).addEventListener("change",render));
-window.addEventListener("load", render);
 
 // ===== 인보이스 데이터 관리: 단건 등록 · 일괄 업로드 · 데이터 수정 =====
 function refreshAll() { refreshOptions(); render(); renderEdit(); }
@@ -372,18 +411,22 @@ function normRow(o) {
 
 // --- 단건 등록 ---
 const oneForm = $("oneForm");
-oneForm.date.value = new Date().toISOString().slice(0, 10);
-oneForm.addEventListener("reset", () => setTimeout(() => { oneForm.date.value = new Date().toISOString().slice(0, 10); }));
+const today = () => new Date().toISOString().slice(0, 10);
+oneForm.date.value = today();
+oneForm.addEventListener("reset", () => setTimeout(() => { oneForm.date.value = today(); }));
 oneForm.addEventListener("submit", async e => {
   e.preventDefault();
   const o = Object.fromEntries(new FormData(oneForm)), file = oneForm.file.files[0];
   const {row, errs} = normRow(o);
   if (errs.length) return say("oneMsg", "확인 필요: " + errs.join(", "));
   if (file && !row.invoice) return say("oneMsg", "인보이스 파일을 첨부하려면 인보이스번호를 입력하세요.");
-  rows.push({id:newId(), ...row}); saveRows();
-  try { if (file) await saveFile(row.invoice, file); }
-  catch (err) { say("oneMsg", "데이터는 등록했지만 파일 저장에 실패했습니다."); refreshAll(); return; }
-  say("oneMsg", `등록했습니다: ${row.date} · ${row.country} · ${row.channel} · ${won(row.amount)}${file ? " · 파일 첨부" : ""}`, true);
+  say("oneMsg", "저장 중…", true);
+  const {data, error} = await sb.from("overseas_sales").insert(toDb(row)).select().single();
+  if (error) return say("oneMsg", "저장하지 못했습니다: " + error.message);
+  rows.push(fromDb(data));
+  let note = "";
+  if (file) { try { await saveFile(row.invoice, file); note = " · 파일 첨부"; } catch (err) { note = " · 파일 저장 실패: " + err.message; } }
+  say("oneMsg", `등록했습니다: ${row.date} · ${row.country} · ${row.channel} · ${won(row.amount)}${note}`, !note.includes("실패"));
   oneForm.reset(); refreshAll();
 });
 
@@ -430,23 +473,37 @@ function showPreview(name) {
   $("pvSum").innerHTML = `<b>${esc(name)}</b> · 총 ${pending.length}건 · <span class="up">정상 ${ok}</span>` + (bad ? ` · <span class="down">오류 ${bad} (반영 제외)</span>` : "");
   const shown = [...pending].sort((a, b) => b.errs.length - a.errs.length).slice(0, 100);
   $("pvTbl").innerHTML = "<tr>" + [...COLS.map(c => c[1]), "확인"].map(h => `<th>${h}</th>`).join("") + "</tr>" +
-    shown.map(p => `<tr class="${p.errs.length ? "err" : ""}">${COLS.map(([k]) => `<td>${esc(Number.isFinite(p.row[k]) && typeof p.row[k] === "number" ? p.row[k].toLocaleString() : p.row[k])}</td>`).join("")}<td>${p.errs.length ? "오류: " + p.errs.join(", ") : "정상"}</td></tr>`).join("") +
+    shown.map(p => `<tr class="${p.errs.length ? "err" : ""}">${COLS.map(([k]) => `<td>${esc(typeof p.row[k] === "number" && Number.isFinite(p.row[k]) ? p.row[k].toLocaleString() : p.row[k])}</td>`).join("")}<td>${p.errs.length ? "오류: " + p.errs.join(", ") : "정상"}</td></tr>`).join("") +
     (pending.length > 100 ? `<tr><td colspan="9" class="sub2">… 외 ${pending.length - 100}건 (미리보기는 100건까지)</td></tr>` : "");
   $("applyBtn").disabled = !ok;
   $("preview").hidden = false; say("bulkMsg", "", true);
 }
-$("applyBtn").addEventListener("click", () => {
+$("applyBtn").addEventListener("click", async () => {
   const good = pending.filter(p => !p.errs.length).map(p => p.row);
   const replace = document.querySelector("input[name=mode]:checked").value === "replace";
-  let removed = 0;
-  if (replace) {
-    const inv = new Set(good.map(r => r.invoice).filter(Boolean));
-    const before = rows.length; rows = rows.filter(r => !r.invoice || !inv.has(r.invoice)); removed = before - rows.length;
+  $("applyBtn").disabled = true; say("bulkMsg", "DB에 저장 중…", true);
+  try {
+    let removed = 0;
+    if (replace) {
+      const inv = [...new Set(good.map(r => r.invoice).filter(Boolean))];
+      for (const part of chunk(inv, 200)) {
+        const {count, error} = await sb.from("overseas_sales").delete({count:"exact"}).in("invoice_no", part);
+        if (error) throw error;
+        removed += count || 0;
+      }
+    }
+    for (const part of chunk(good, 500)) {
+      const {error} = await sb.from("overseas_sales").insert(part.map(toDb));
+      if (error) throw error;
+    }
+    pending = []; $("preview").hidden = true; $("bulkFile").value = "";
+    await reload();
+    say("bulkMsg", `${good.length}건을 반영했습니다.` + (removed ? ` (기존 ${removed}건 교체)` : ""), true);
+  } catch (err) {
+    await reload();
+    say("bulkMsg", "반영 중 오류가 났습니다(일부만 저장됐을 수 있으니 데이터 수정 탭에서 확인하세요): " + err.message);
+    $("applyBtn").disabled = false;
   }
-  rows.push(...good.map(r => ({id:newId(), ...r}))); saveRows();
-  pending = []; $("preview").hidden = true; $("bulkFile").value = "";
-  say("bulkMsg", `${good.length}건을 반영했습니다.` + (removed ? ` (기존 ${removed}건 교체)` : ""), true);
-  refreshAll();
 });
 $("cancelBtn").addEventListener("click", () => { pending = []; $("preview").hidden = true; $("bulkFile").value = ""; say("bulkMsg", "", true); });
 $("bulkFile").addEventListener("change", e => handleBulk(e.target.files[0]));
@@ -457,11 +514,12 @@ async function handleInvFiles(files) {
   const invs = [...new Set(rows.map(r => r.invoice).filter(Boolean))];
   if (!invs.length) return say("invMsg", "인보이스번호가 입력된 데이터가 없습니다. 먼저 데이터를 등록하세요.");
   const okN = [], miss = [];
+  say("invMsg", "업로드 중…", true);
   for (const f of files) {
     const base = fnorm(f.name.replace(/\.[^.]+$/, ""));
     const hit = invs.filter(i => fnorm(i) && base.includes(fnorm(i))).sort((a, b) => b.length - a.length)[0];
     if (!hit) { miss.push(f.name); continue; }
-    try { await saveFile(hit, f); okN.push(`${f.name} → ${hit}`); } catch (e) { miss.push(f.name + " (저장 실패)"); }
+    try { await saveFile(hit, f); okN.push(`${f.name} → ${hit}`); } catch (e) { miss.push(`${f.name} (저장 실패: ${e.message})`); }
   }
   $("invMsg").innerHTML = (okN.length ? `<div class="up">연결 ${okN.length}건: ${okN.map(esc).join(", ")}</div>` : "") +
     (miss.length ? `<div class="down">연결 못함 ${miss.length}건: ${miss.map(esc).join(", ")}</div>` : "");
@@ -486,7 +544,7 @@ $("expBtn").addEventListener("click", () => {
   const data = [...rows].sort((a, b) => a.date.localeCompare(b.date)).map(r => COLS.map(([k]) => r[k]));
   const ws = XLSX.utils.aoa_to_sheet([COLS.map(c => c[1]), ...data]);
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "해외매출");
-  XLSX.writeFile(wb, `해외매출_데이터_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `해외매출_데이터_${today()}.xlsx`);
 });
 
 // --- 데이터 수정 ---
@@ -497,7 +555,7 @@ const sel = new Set();
 function fileCell(r) {
   if (!r.invoice) return '<span class="sub2">번호 없음</span>';
   return FILES[r.invoice]
-    ? `<a href="#" data-act="open" title="${esc(FILES[r.invoice])}">보기</a> <button class="btn sm" type="button" data-act="attach">변경</button>`
+    ? `<a href="#" data-act="open" title="${esc(FILES[r.invoice].name)}">보기</a> <button class="btn sm" type="button" data-act="attach">변경</button>`
     : `<button class="btn sm" type="button" data-act="attach">첨부</button>`;
 }
 function renderEdit() {
@@ -521,40 +579,47 @@ function renderEdit() {
         `<td><button class="btn sm" type="button" data-act="edit">수정</button> <button class="btn sm danger" type="button" data-act="del">삭제</button></td></tr>`;
     }
   }
-  if (!view.length) h += `<tr><td colspan="11" class="sub2" style="text-align:center">데이터가 없습니다</td></tr>`;
+  if (!view.length) h += `<tr><td colspan="11" class="empty">데이터가 없습니다</td></tr>`;
   $("edit").innerHTML = h;
   $("pager").innerHTML = `<span class="sub2">총 ${list.length.toLocaleString("ko-KR")}건 · 선택 ${sel.size}건 · ${page + 1}/${pages} 페이지</span>` +
     `<button class="btn sm" type="button" data-pg="-1"${page ? "" : " disabled"}>이전</button><button class="btn sm" type="button" data-pg="1"${page < pages - 1 ? "" : " disabled"}>다음</button>`;
 }
-function saveEdit(tr) {
+async function saveEdit(tr) {
   const o = {}; tr.querySelectorAll("input[data-k]").forEach(i => o[i.dataset.k] = i.value);
   const {row, errs} = normRow(o);
   if (errs.length) return alert("확인 필요: " + errs.join(", "));
+  const {error} = await sb.from("overseas_sales").update(toDb(row)).eq("id", tr.dataset.id);
+  if (error) return alert("저장하지 못했습니다: " + error.message);
   Object.assign(rows.find(r => r.id === tr.dataset.id), row);
-  editId = null; saveRows(); refreshAll();
+  editId = null; refreshAll();
+}
+async function deleteIds(ids) {
+  for (const part of chunk(ids, 200)) {
+    const {error} = await sb.from("overseas_sales").delete().in("id", part);
+    if (error) { alert("삭제하지 못했습니다: " + error.message); return reload(); }
+  }
+  const gone = new Set(ids);
+  rows = rows.filter(r => !gone.has(r.id)); ids.forEach(id => sel.delete(id)); refreshAll();
 }
 $("edit").addEventListener("click", async e => {
   const act = e.target.dataset.act; if (!act) return;
   const tr = e.target.closest("tr"), id = tr?.dataset.id, r = rows.find(x => x.id === id);
   if (act === "selAll") { view.forEach(v => e.target.checked ? sel.add(v.id) : sel.delete(v.id)); renderEdit(); }
   else if (act === "sel") { e.target.checked ? sel.add(id) : sel.delete(id); renderEdit(); }
-  else if (act === "edit") { editId = id; renderEdit(); tr.parentNode.querySelector("tr.editing input")?.focus(); }
+  else if (act === "edit") { editId = id; renderEdit(); $("edit").querySelector("tr.editing input")?.focus(); }
   else if (act === "cancel") { editId = null; renderEdit(); }
   else if (act === "save") saveEdit(tr);
   else if (act === "del") {
-    if (!confirm(`${r.date} · ${r.country} · ${r.channel} · ${won(r.amount)}\n이 데이터를 삭제할까요?`)) return;
-    rows = rows.filter(x => x.id !== id); sel.delete(id); saveRows(); refreshAll();
+    if (confirm(`${r.date} · ${r.country} · ${r.channel} · ${won(r.amount)}\n이 데이터를 삭제할까요?`)) deleteIds([id]);
   }
   else if (act === "attach") { attachFor = r.invoice; $("rowFile").click(); }
   else if (act === "open") {
     e.preventDefault();
-    try {
-      const f = await idb.get("inv:" + r.invoice);
-      if (!f) return alert("저장된 파일을 찾지 못했습니다. 다시 첨부하세요.");
-      const url = URL.createObjectURL(f), a = document.createElement("a");
-      a.href = url; if (!/^(application\/pdf|image\/)/.test(f.type)) a.download = f.name; else a.target = "_blank";
-      a.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
-    } catch (err) { alert("파일을 열지 못했습니다."); }
+    const f = FILES[r.invoice], viewable = /\.(pdf|png|jpe?g|gif|webp)$/i.test(f.name);
+    const w = viewable ? window.open("", "_blank") : null;   // 팝업 차단을 피하려고 클릭 시점에 창을 먼저 연다
+    const {data, error} = await sb.storage.from(BUCKET).createSignedUrl(f.path, 300, viewable ? undefined : {download:f.name});
+    if (error) { w?.close(); return alert("파일을 열지 못했습니다: " + error.message); }
+    if (w) w.location = data.signedUrl; else location.href = data.signedUrl;
   }
 });
 $("edit").addEventListener("keydown", e => {
@@ -565,25 +630,57 @@ $("edit").addEventListener("keydown", e => {
 $("rowFile").addEventListener("change", async e => {
   const f = e.target.files[0]; e.target.value = "";
   if (!f || !attachFor) return;
-  try { await saveFile(attachFor, f); renderEdit(); } catch (err) { alert("파일 저장에 실패했습니다."); }
+  try { await saveFile(attachFor, f); renderEdit(); } catch (err) { alert("파일 저장에 실패했습니다: " + err.message); }
 });
 $("pager").addEventListener("click", e => { if (e.target.dataset.pg) { page += +e.target.dataset.pg; renderEdit(); } });
 $("q").addEventListener("input", () => { page = 0; renderEdit(); });
 $("delSel").addEventListener("click", () => {
   if (!sel.size) return alert("삭제할 데이터를 선택하세요.");
-  if (!confirm(`선택한 ${sel.size}건을 삭제할까요?`)) return;
-  rows = rows.filter(r => !sel.has(r.id)); sel.clear(); saveRows(); refreshAll();
+  if (confirm(`선택한 ${sel.size}건을 삭제할까요?`)) deleteIds([...sel]);
 });
-$("resetSample").addEventListener("click", () => {
-  if (!confirm("등록·수정한 데이터를 모두 지우고 샘플 데이터로 되돌릴까요?")) return;
-  rows = SAMPLE.map(r => ({...r})); sel.clear(); editId = null; saveRows(); refreshAll();
+$("reloadBtn").addEventListener("click", reload);
+
+// ===== 로그인 =====
+const authForm = $("authForm");
+const companyEmail = email => email.trim().toLowerCase().endsWith(COMPANY_DOMAIN);
+authForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = authForm.email.value.trim(), password = authForm.password.value;
+  say("authMsg", "로그인 중…", true);
+  const {error} = await sb.auth.signInWithPassword({email, password});
+  if (error) say("authMsg", /confirm/i.test(error.message) ? "메일 인증이 아직 안 됐습니다. 받은 메일의 링크를 눌러 주세요." : "로그인하지 못했습니다: 메일 또는 비밀번호를 확인하세요.");
 });
-$("delAll").addEventListener("click", () => {
-  if (!confirm(`데이터 ${rows.length}건과 첨부한 인보이스 파일을 모두 삭제할까요? (되돌릴 수 없습니다)`)) return;
-  rows = []; sel.clear(); editId = null; FILES = {}; writeLS(FILES_KEY, FILES); idb.clear().catch(() => {});
-  saveRows(); refreshAll();
+$("signupBtn").addEventListener("click", async () => {
+  const email = authForm.email.value.trim(), password = authForm.password.value;
+  if (!companyEmail(email)) return say("authMsg", `회사 메일(${COMPANY_DOMAIN})로만 가입할 수 있습니다.`);
+  if (password.length < 8) return say("authMsg", "비밀번호는 8자 이상으로 정하세요.");
+  const {data, error} = await sb.auth.signUp({email, password, options:{emailRedirectTo: location.origin + location.pathname}});
+  if (error) return say("authMsg", "가입하지 못했습니다: " + error.message);
+  say("authMsg", data.session ? "가입했습니다." : "인증 메일을 보냈습니다. 메일의 링크를 누른 뒤 로그인하세요.", true);
 });
-renderEdit();
+$("resetBtn").addEventListener("click", async () => {
+  const email = authForm.email.value.trim();
+  if (!email) return say("authMsg", "회사 메일을 먼저 입력하세요.");
+  const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname});
+  say("authMsg", error ? "메일을 보내지 못했습니다: " + error.message : "비밀번호 재설정 메일을 보냈습니다.", !error);
+});
+$("logoutBtn").addEventListener("click", () => sb.auth.signOut());
+
+let shownFor = null;
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === "PASSWORD_RECOVERY") {
+    const pw = prompt("새 비밀번호를 입력하세요 (8자 이상)");
+    if (pw && pw.length >= 8) sb.auth.updateUser({password:pw}).then(({error}) => alert(error ? "변경하지 못했습니다: " + error.message : "비밀번호를 바꿨습니다."));
+  }
+  const user = session?.user;
+  $("auth").hidden = !!user; $("app").hidden = !user;
+  if (!user) { shownFor = null; rows = []; FILES = {}; return; }
+  if (shownFor === user.id) return;
+  shownFor = user.id;
+  $("whoami").textContent = user.email;
+  if (!companyEmail(user.email || "")) { $("appMsg").textContent = `회사 메일(${COMPANY_DOMAIN}) 계정이 아니라 데이터를 볼 수 없습니다.`; $("appMsg").hidden = false; }
+  setTimeout(reload);   // 인증 콜백 안에서 바로 DB를 부르면 멈출 수 있어 다음 틱에 실행
+});
 </script>
 </body>
 </html>
