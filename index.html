@@ -77,6 +77,13 @@ input[type=text],input[type=number],input[type=search],input[type=email],input[t
 .auth form{display:flex;flex-direction:column;gap:10px}
 .auth label{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:13px}
 .empty{text-align:center;color:var(--muted);padding:18px}
+.form input.ai{background:rgba(234,179,8,.14);border-color:#eab308}
+.aibox{border:1px solid #eab308;background:rgba(234,179,8,.08);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:13px}
+.aibox b{color:var(--text)}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);padding:18px 20px;max-width:520px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog table td{text-align:left;padding:6px 8px}
+dialog table td:first-child{color:var(--muted);width:110px}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -152,12 +159,16 @@ input[type=text],input[type=number],input[type=search],input[type=email],input[t
     <h2>인보이스 데이터 관리</h2>
     <p class="sub2">등록·업로드·수정한 데이터는 회사 공용 DB에 저장되며, 로그인한 직원 모두가 같은 데이터를 봅니다.</p>
     <div class="tabs" role="tablist">
-      <button type="button" class="tab on" data-tab="m1">단건 등록</button>
-      <button type="button" class="tab" data-tab="m2">일괄 업로드</button>
+      <button type="button" class="tab on" data-tab="m1">인보이스 등록</button>
       <button type="button" class="tab" data-tab="m3">데이터 수정</button>
     </div>
 
     <div id="m1" class="panel">
+      <label class="drop" id="drop1" style="margin-top:0"><input type="file" id="invFile" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.xlsx,.xls,.csv" hidden>
+        <b>① 인보이스 파일 올리기</b> — PDF·이미지·엑셀을 끌어다 놓거나 클릭<br><span class="sub2">어떤 언어든 AI가 읽고 아래 입력칸을 미리 채웁니다. 저장하기 전에 꼭 원본과 대조해 확인하세요.</span></label>
+      <div class="msg" id="aiMsg"></div>
+      <div class="aibox" id="aiBox" hidden></div>
+      <h3 style="margin-top:14px">② 내용 확인·수정 <span class="sub2">노란 칸은 AI가 채운 값입니다</span></h3>
       <form id="oneForm" class="form" autocomplete="off">
         <label>일자 *<input type="date" name="date" required></label>
         <label>인보이스번호<input type="text" name="invoice" placeholder="예: INV-2026-001"></label>
@@ -166,46 +177,30 @@ input[type=text],input[type=number],input[type=search],input[type=email],input[t
         <label>브랜드 *<input type="text" name="brand" list="dl-brand" required></label>
         <label>바이어<input type="text" name="buyer" list="dl-buyer"></label>
         <label>수량 *<input type="number" name="qty" min="0" step="1" required></label>
+        <label>통화<input type="text" name="currency" value="KRW" list="dl-currency" maxlength="3" style="text-transform:uppercase"></label>
+        <label>외화 금액<input type="number" name="amount_foreign" step="any" placeholder="인보이스 총액"></label>
+        <label>환율 (1단위 = 원)<input type="number" name="fx_rate" step="any" placeholder="예: 1380"></label>
         <label>금액(원) *<input type="number" name="amount" step="1" required></label>
-        <label class="span2">인보이스 파일 (PDF·이미지·엑셀, 인보이스번호 필요)<input type="file" name="file" accept=".pdf,image/*,.xlsx,.xls,.csv"></label>
-        <div class="span2 row-act" style="align-self:end"><button class="btn pri" type="submit">등록</button><button class="btn" type="reset">비우기</button></div>
+        <p class="sub2 span2" style="margin:0;align-self:end">외화 금액과 환율을 넣으면 원화 금액이 자동 계산됩니다.</p>
+        <div class="span2 row-act" style="align-self:end"><button class="btn pri" type="submit">확인 후 등록</button><button class="btn" type="button" id="clearBtn">비우기</button></div>
       </form>
       <div class="msg" id="oneMsg"></div>
     </div>
 
-    <div id="m2" class="panel" hidden>
-      <div class="grid g2" style="margin:0">
-        <div>
-          <h3>① 매출 데이터 일괄 업로드</h3>
-          <p class="sub2">엑셀(.xlsx·.xls) 또는 CSV · 첫 행 머리글: 일자 · 인보이스번호 · 국가 · 채널 · 브랜드 · 바이어 · 수량 · 금액(원)</p>
-          <label class="drop" id="drop1"><input type="file" id="bulkFile" accept=".xlsx,.xls,.csv" hidden>파일을 끌어다 놓거나 클릭해서 선택</label>
-          <div class="row-act"><button class="btn" type="button" id="tplBtn">업로드 양식 받기</button><button class="btn" type="button" id="expBtn">현재 데이터 엑셀로 받기</button></div>
-        </div>
-        <div>
-          <h3>② 인보이스 파일 일괄 첨부</h3>
-          <p class="sub2">파일명에 인보이스번호가 들어 있으면 해당 데이터에 자동 연결됩니다. (예: INV-2026-001.pdf)</p>
-          <label class="drop" id="drop2"><input type="file" id="bulkInv" multiple accept=".pdf,image/*,.xlsx,.xls,.csv" hidden>인보이스 파일 여러 개를 끌어다 놓거나 클릭</label>
-          <div class="msg" id="invMsg"></div>
-        </div>
-      </div>
-      <div id="preview" hidden style="margin-top:14px">
-        <h3>업로드 미리보기</h3>
-        <div class="row-act" style="margin-top:4px">
-          <span id="pvSum"></span>
-          <label><input type="radio" name="mode" value="add" checked> 기존 데이터에 추가</label>
-          <label><input type="radio" name="mode" value="replace"> 같은 인보이스번호는 교체</label>
-          <button class="btn pri" type="button" id="applyBtn">반영</button>
-          <button class="btn" type="button" id="cancelBtn">취소</button>
-        </div>
-        <div class="scroll" style="margin-top:8px"><table id="pvTbl"></table></div>
-      </div>
-      <div class="msg" id="bulkMsg"></div>
-    </div>
+    <dialog id="confirmDlg">
+      <h2 style="margin-top:0">등록 전 확인</h2>
+      <p class="sub2" id="cfNote"></p>
+      <table id="cfTbl"></table>
+      <label class="row-act" style="color:var(--text)"><input type="checkbox" id="cfCheck"> 원본 인보이스와 대조해 내용이 맞는지 확인했습니다</label>
+      <div class="row-act" style="justify-content:flex-end"><button class="btn" type="button" id="cfCancel">다시 수정</button><button class="btn pri" type="button" id="cfOk" disabled>등록</button></div>
+    </dialog>
+    <datalist id="dl-currency"><option value="KRW"><option value="USD"><option value="JPY"><option value="CNY"><option value="EUR"><option value="SGD"><option value="MYR"><option value="IDR"><option value="THB"><option value="VND"></datalist>
 
     <div id="m3" class="panel" hidden>
       <div class="row-act" style="margin:0 0 10px">
         <input type="search" id="q" placeholder="검색 (일자·인보이스번호·국가·채널·브랜드·바이어)" style="flex:1;min-width:200px">
         <button class="btn danger" type="button" id="delSel">선택 삭제</button>
+        <button class="btn" type="button" id="expBtn">엑셀로 받기</button>
       </div>
       <div class="scroll"><table id="edit"></table></div>
       <div class="row-act" id="pager"></div>
@@ -229,7 +224,8 @@ const BUCKET = "invoices";
 
 let rows = [];   // {id, date, invoice, country, channel, brand, buyer, qty, amount}
 let FILES = {};  // 인보이스번호 → {name, path}
-const fromDb = d => ({id:d.id, date:d.sale_date, invoice:d.invoice_no, country:d.country, channel:d.channel, brand:d.brand, buyer:d.buyer, qty:Number(d.qty), amount:Number(d.amount)});
+const fromDb = d => ({id:d.id, date:d.sale_date, invoice:d.invoice_no, country:d.country, channel:d.channel, brand:d.brand, buyer:d.buyer, qty:Number(d.qty), amount:Number(d.amount),
+  currency:d.currency, amountForeign:d.amount_foreign == null ? null : Number(d.amount_foreign), fxRate:d.fx_rate == null ? null : Number(d.fx_rate), source:d.entry_source});
 const toDb = r => ({sale_date:r.date, invoice_no:r.invoice, country:r.country, channel:r.channel, brand:r.brand, buyer:r.buyer, qty:r.qty, amount:r.amount});
 const chunk = (a, n) => Array.from({length:Math.ceil(a.length / n)}, (_, i) => a.slice(i * n, (i + 1) * n));
 
@@ -409,140 +405,121 @@ function normRow(o) {
   return {row, errs};
 }
 
-// --- 단건 등록 ---
+// --- 인보이스 등록: 파일 올리기 → AI 초안 → 사람이 확인 → 저장 ---
 const oneForm = $("oneForm");
 const today = () => new Date().toISOString().slice(0, 10);
+let invFile = null, aiFilled = false;
+function resetEntry() {
+  oneForm.reset(); oneForm.date.value = today(); oneForm.currency.value = "KRW";
+  oneForm.querySelectorAll("input.ai").forEach(i => i.classList.remove("ai"));
+  invFile = null; aiFilled = false; $("aiBox").hidden = true; $("invFile").value = "";
+}
 oneForm.date.value = today();
-oneForm.addEventListener("reset", () => setTimeout(() => { oneForm.date.value = today(); }));
-oneForm.addEventListener("submit", async e => {
+$("clearBtn").addEventListener("click", () => { resetEntry(); say("aiMsg", "", true); say("oneMsg", "", true); });
+oneForm.addEventListener("input", e => {
+  e.target.classList.remove("ai");   // 사람이 고친 칸은 노란 표시를 지운다
+  if (["amount_foreign","fx_rate"].includes(e.target.name)) {
+    const v = num(oneForm.amount_foreign.value) * num(oneForm.fx_rate.value);
+    if (oneForm.amount_foreign.value && oneForm.fx_rate.value && Number.isFinite(v)) oneForm.amount.value = Math.round(v);
+  }
+});
+
+const toBase64 = file => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(String(r.result).split(",")[1]); r.onerror = () => rej(r.error);
+  r.readAsDataURL(file);
+});
+async function readInvoice(file) {
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) return say("aiMsg", "20MB 이하 파일만 올릴 수 있습니다.");
+  resetEntry(); invFile = file;
+  say("aiMsg", `"${file.name}" 읽는 중… (보통 10~30초)`, true);
+  const body = {file_name:file.name, known:{country:uniq("country"), channel:uniq("channel"), brand:uniq("brand"), buyer:uniq("buyer")}};
+  try {
+    if (/\.(xlsx|xls|csv)$/i.test(file.name)) {
+      if (!window.XLSX) return say("aiMsg", "엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인하세요.");
+      const wb = XLSX.read(await file.arrayBuffer(), {type:"array"});
+      body.text = wb.SheetNames.map(n => `# ${n}\n` + XLSX.utils.sheet_to_csv(wb.Sheets[n])).join("\n\n");
+    } else {
+      const type = file.type || (/\.pdf$/i.test(file.name) ? "application/pdf" : "");
+      if (!/^(application\/pdf|image\/(jpeg|png|gif|webp))$/.test(type)) return say("aiMsg", "PDF·JPG·PNG·GIF·WEBP·엑셀 파일만 읽을 수 있습니다.");
+      body.media_type = type; body.file_base64 = await toBase64(file);
+    }
+    const {data, error} = await sb.functions.invoke("read-invoice", {body});
+    if (error) {
+      let msg = error.message;
+      try { msg = (await error.context.json()).error || msg; } catch (e) {}
+      return say("aiMsg", "AI가 읽지 못했습니다: " + msg + " — 아래 칸에 직접 입력해도 됩니다.");
+    }
+    fillDraft(data.draft);
+  } catch (err) { say("aiMsg", "파일을 처리하지 못했습니다: " + err.message); }
+}
+function fillDraft(d) {
+  const set = (name, v) => {
+    if (v === null || v === undefined || v === "") return;
+    oneForm[name].value = v; oneForm[name].classList.add("ai");
+  };
+  set("date", normDate(d.invoice_date)); set("invoice", d.invoice_no); set("country", d.country);
+  set("channel", d.channel); set("brand", d.brand); set("buyer", d.buyer); set("qty", d.qty);
+  const cur = String(d.currency || "").toUpperCase();
+  set("currency", cur);
+  if (cur === "KRW") set("amount", d.amount_foreign);
+  else set("amount_foreign", d.amount_foreign);
+  aiFilled = true;
+  say("aiMsg", "AI가 초안을 채웠습니다. 노란 칸을 원본과 대조해 확인하세요." + (cur && cur !== "KRW" ? " 환율을 넣으면 원화 금액이 계산됩니다." : ""), true);
+  $("aiBox").innerHTML = `<b>AI 메모</b> (원문: ${esc(d.source_language || "-")}) — ${esc(d.notes || "")}`;
+  $("aiBox").hidden = false;
+}
+$("invFile").addEventListener("change", e => readInvoice(e.target.files[0]));
+{
+  const el = $("drop1");
+  el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("over"); });
+  el.addEventListener("dragleave", () => el.classList.remove("over"));
+  el.addEventListener("drop", e => { e.preventDefault(); el.classList.remove("over"); readInvoice(e.dataTransfer.files[0]); });
+}
+
+// 등록 버튼 → 확인 창 → 체크해야 저장
+let pendingEntry = null;
+oneForm.addEventListener("submit", e => {
   e.preventDefault();
-  const o = Object.fromEntries(new FormData(oneForm)), file = oneForm.file.files[0];
+  const o = Object.fromEntries(new FormData(oneForm));
   const {row, errs} = normRow(o);
   if (errs.length) return say("oneMsg", "확인 필요: " + errs.join(", "));
-  if (file && !row.invoice) return say("oneMsg", "인보이스 파일을 첨부하려면 인보이스번호를 입력하세요.");
-  say("oneMsg", "저장 중…", true);
-  const {data, error} = await sb.from("overseas_sales").insert(toDb(row)).select().single();
+  if (invFile && !row.invoice) return say("oneMsg", "인보이스 파일을 함께 저장하려면 인보이스번호를 입력하세요.");
+  const currency = String(o.currency || "KRW").trim().toUpperCase() || "KRW";
+  const extra = {currency, amount_foreign: o.amount_foreign === "" ? null : num(o.amount_foreign), fx_rate: o.fx_rate === "" ? null : num(o.fx_rate),
+    entry_source: aiFilled ? "ai" : "manual"};
+  pendingEntry = {row, extra};
+  const lines = [["일자", row.date], ["인보이스번호", row.invoice || "-"], ["국가", row.country], ["채널", row.channel], ["브랜드", row.brand], ["바이어", row.buyer || "-"],
+    ["수량", row.qty.toLocaleString("ko-KR")], ...(currency !== "KRW" ? [["외화 금액", `${(extra.amount_foreign ?? 0).toLocaleString()} ${currency}`], ["환율", extra.fx_rate ?? "-"]] : []),
+    ["금액(원)", won(row.amount)], ["첨부 파일", invFile ? invFile.name : "없음"]];
+  $("cfTbl").innerHTML = lines.map(([k, v]) => `<tr><td>${k}</td><td>${esc(v)}</td></tr>`).join("");
+  const stillAi = oneForm.querySelectorAll("input.ai").length;
+  $("cfNote").textContent = aiFilled ? `AI가 채운 칸 중 ${stillAi}개는 손대지 않았습니다. 원본과 맞는지 다시 확인하세요.` : "입력한 내용이 맞는지 확인하세요.";
+  $("cfCheck").checked = false; $("cfOk").disabled = true;
+  $("confirmDlg").showModal();
+});
+$("cfCheck").addEventListener("change", e => { $("cfOk").disabled = !e.target.checked; });
+$("cfCancel").addEventListener("click", () => $("confirmDlg").close());
+$("cfOk").addEventListener("click", async () => {
+  const {row, extra} = pendingEntry;
+  $("cfOk").disabled = true;
+  const {data:{user}} = await sb.auth.getUser();
+  const {data, error} = await sb.from("overseas_sales").insert({...toDb(row), ...extra, confirmed_by:user?.email || null}).select().single();
+  $("confirmDlg").close();
   if (error) return say("oneMsg", "저장하지 못했습니다: " + error.message);
   rows.push(fromDb(data));
   let note = "";
-  if (file) { try { await saveFile(row.invoice, file); note = " · 파일 첨부"; } catch (err) { note = " · 파일 저장 실패: " + err.message; } }
+  if (invFile) { try { await saveFile(row.invoice, invFile); note = " · 파일 저장"; } catch (err) { note = " · 파일 저장 실패: " + err.message; } }
   say("oneMsg", `등록했습니다: ${row.date} · ${row.country} · ${row.channel} · ${won(row.amount)}${note}`, !note.includes("실패"));
-  oneForm.reset(); refreshAll();
+  resetEntry(); say("aiMsg", "", true); refreshAll();
 });
 
-// --- 일괄 업로드 ---
-const COLS = [
-  ["date","일자",["일자","날짜","date","인보이스일자","invoicedate"]],
-  ["invoice","인보이스번호",["인보이스번호","인보이스","invoice","invoiceno","invoiceno.","invno","inv"]],
-  ["country","국가",["국가","country"]],
-  ["channel","채널",["채널","channel"]],
-  ["brand","브랜드",["브랜드","brand"]],
-  ["buyer","바이어",["바이어","바이어명","buyer"]],
-  ["qty","수량",["수량","qty","quantity"]],
-  ["amount","금액(원)",["금액(원)","금액","매출","매출액","amount"]],
-];
-const hnorm = s => String(s).toLowerCase().replace(/\s/g, "");
-let pending = [];
-function needXLSX(id) { if (window.XLSX) return true; say(id, "엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인하세요."); return false; }
-async function readSheet(file) {
-  const buf = await file.arrayBuffer();
-  let wb;
-  if (/\.csv$/i.test(file.name)) {
-    let text = new TextDecoder("utf-8").decode(buf);
-    if (text.includes("�")) text = new TextDecoder("euc-kr").decode(buf); // 엑셀에서 저장한 한글 CSV
-    wb = XLSX.read(text, {type:"string", raw:true});
-  } else wb = XLSX.read(buf, {type:"array"});
-  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
-}
-async function handleBulk(file) {
-  if (!file || !needXLSX("bulkMsg")) return;
-  try {
-    const json = await readSheet(file);
-    if (!json.length) return say("bulkMsg", "읽을 데이터가 없습니다.");
-    const heads = Object.keys(json[0]), map = {};
-    for (const [k, , alias] of COLS) { const h = heads.find(x => alias.includes(hnorm(x))); if (h) map[k] = h; }
-    const miss = COLS.filter(([k]) => !map[k] && !["invoice","buyer"].includes(k)).map(c => c[1]);
-    if (miss.length) return say("bulkMsg", "머리글을 찾지 못했습니다: " + miss.join(", ") + " — 업로드 양식을 참고하세요.");
-    pending = json.map(r => normRow(Object.fromEntries(COLS.map(([k]) => [k, map[k] ? r[map[k]] : ""]))))
-      .filter((p, i) => Object.values(json[i]).some(v => String(v).trim() !== ""));
-    showPreview(file.name);
-  } catch (err) { say("bulkMsg", "파일을 읽지 못했습니다: " + err.message); }
-}
-function showPreview(name) {
-  const ok = pending.filter(p => !p.errs.length).length, bad = pending.length - ok;
-  $("pvSum").innerHTML = `<b>${esc(name)}</b> · 총 ${pending.length}건 · <span class="up">정상 ${ok}</span>` + (bad ? ` · <span class="down">오류 ${bad} (반영 제외)</span>` : "");
-  const shown = [...pending].sort((a, b) => b.errs.length - a.errs.length).slice(0, 100);
-  $("pvTbl").innerHTML = "<tr>" + [...COLS.map(c => c[1]), "확인"].map(h => `<th>${h}</th>`).join("") + "</tr>" +
-    shown.map(p => `<tr class="${p.errs.length ? "err" : ""}">${COLS.map(([k]) => `<td>${esc(typeof p.row[k] === "number" && Number.isFinite(p.row[k]) ? p.row[k].toLocaleString() : p.row[k])}</td>`).join("")}<td>${p.errs.length ? "오류: " + p.errs.join(", ") : "정상"}</td></tr>`).join("") +
-    (pending.length > 100 ? `<tr><td colspan="9" class="sub2">… 외 ${pending.length - 100}건 (미리보기는 100건까지)</td></tr>` : "");
-  $("applyBtn").disabled = !ok;
-  $("preview").hidden = false; say("bulkMsg", "", true);
-}
-$("applyBtn").addEventListener("click", async () => {
-  const good = pending.filter(p => !p.errs.length).map(p => p.row);
-  const replace = document.querySelector("input[name=mode]:checked").value === "replace";
-  $("applyBtn").disabled = true; say("bulkMsg", "DB에 저장 중…", true);
-  try {
-    let removed = 0;
-    if (replace) {
-      const inv = [...new Set(good.map(r => r.invoice).filter(Boolean))];
-      for (const part of chunk(inv, 200)) {
-        const {count, error} = await sb.from("overseas_sales").delete({count:"exact"}).in("invoice_no", part);
-        if (error) throw error;
-        removed += count || 0;
-      }
-    }
-    for (const part of chunk(good, 500)) {
-      const {error} = await sb.from("overseas_sales").insert(part.map(toDb));
-      if (error) throw error;
-    }
-    pending = []; $("preview").hidden = true; $("bulkFile").value = "";
-    await reload();
-    say("bulkMsg", `${good.length}건을 반영했습니다.` + (removed ? ` (기존 ${removed}건 교체)` : ""), true);
-  } catch (err) {
-    await reload();
-    say("bulkMsg", "반영 중 오류가 났습니다(일부만 저장됐을 수 있으니 데이터 수정 탭에서 확인하세요): " + err.message);
-    $("applyBtn").disabled = false;
-  }
-});
-$("cancelBtn").addEventListener("click", () => { pending = []; $("preview").hidden = true; $("bulkFile").value = ""; say("bulkMsg", "", true); });
-$("bulkFile").addEventListener("change", e => handleBulk(e.target.files[0]));
-
-// 인보이스 파일 일괄 첨부: 파일명 안에 들어 있는 인보이스번호 중 가장 긴 것과 연결
-const fnorm = s => String(s).toLowerCase().replace(/[^a-z0-9가-힣]/g, "");
-async function handleInvFiles(files) {
-  const invs = [...new Set(rows.map(r => r.invoice).filter(Boolean))];
-  if (!invs.length) return say("invMsg", "인보이스번호가 입력된 데이터가 없습니다. 먼저 데이터를 등록하세요.");
-  const okN = [], miss = [];
-  say("invMsg", "업로드 중…", true);
-  for (const f of files) {
-    const base = fnorm(f.name.replace(/\.[^.]+$/, ""));
-    const hit = invs.filter(i => fnorm(i) && base.includes(fnorm(i))).sort((a, b) => b.length - a.length)[0];
-    if (!hit) { miss.push(f.name); continue; }
-    try { await saveFile(hit, f); okN.push(`${f.name} → ${hit}`); } catch (e) { miss.push(`${f.name} (저장 실패: ${e.message})`); }
-  }
-  $("invMsg").innerHTML = (okN.length ? `<div class="up">연결 ${okN.length}건: ${okN.map(esc).join(", ")}</div>` : "") +
-    (miss.length ? `<div class="down">연결 못함 ${miss.length}건: ${miss.map(esc).join(", ")}</div>` : "");
-  $("invMsg").className = "msg"; $("bulkInv").value = ""; renderEdit();
-}
-$("bulkInv").addEventListener("change", e => handleInvFiles([...e.target.files]));
-for (const [dz, fn] of [["drop1", fs => handleBulk(fs[0])], ["drop2", fs => handleInvFiles(fs)]]) {
-  const el = $(dz);
-  el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("over"); });
-  el.addEventListener("dragleave", () => el.classList.remove("over"));
-  el.addEventListener("drop", e => { e.preventDefault(); el.classList.remove("over"); fn([...e.dataTransfer.files]); });
-}
-$("tplBtn").addEventListener("click", () => {
-  if (!needXLSX("bulkMsg")) return;
-  const ws = XLSX.utils.aoa_to_sheet([COLS.map(c => c[1]), ["2026-11-01","INV-2026-001","미국","Amazon","AZH","바이어명",10,500000], ["2026-11-02","INV-2026-002","일본","B2B","Tiberias","",25,1200000]]);
-  ws["!cols"] = COLS.map(() => ({wch:14}));
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "업로드양식");
-  XLSX.writeFile(wb, "해외매출_인보이스_업로드양식.xlsx");
-});
+const EXPORT_COLS = [["date","일자"],["invoice","인보이스번호"],["country","국가"],["channel","채널"],["brand","브랜드"],["buyer","바이어"],["qty","수량"],["currency","통화"],["amountForeign","외화 금액"],["fxRate","환율"],["amount","금액(원)"]];
 $("expBtn").addEventListener("click", () => {
-  if (!needXLSX("bulkMsg")) return;
-  const data = [...rows].sort((a, b) => a.date.localeCompare(b.date)).map(r => COLS.map(([k]) => r[k]));
-  const ws = XLSX.utils.aoa_to_sheet([COLS.map(c => c[1]), ...data]);
+  if (!window.XLSX) return alert("엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인하세요.");
+  const data = [...rows].sort((a, b) => a.date.localeCompare(b.date)).map(r => EXPORT_COLS.map(([k]) => r[k] ?? ""));
+  const ws = XLSX.utils.aoa_to_sheet([EXPORT_COLS.map(c => c[1]), ...data]);
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "해외매출");
   XLSX.writeFile(wb, `해외매출_데이터_${today()}.xlsx`);
 });
